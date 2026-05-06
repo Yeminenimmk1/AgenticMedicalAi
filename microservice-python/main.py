@@ -71,10 +71,10 @@ async def load_models():
     print("  FastAPI Server Ready on port 8000")
     print("="*55)
 
-@app.get("/api/health")
+@app.api_route("/api/health", methods=["GET", "HEAD"])
 def health_check():
-    """Simple health check endpoint."""
-    return {"status": "ok", "models_loaded": len(ml_models)}
+    """Health check endpoint — used by UptimeRobot to keep Render alive."""
+    return {"status": "ok", "service": "medicalai-python", "models_loaded": len(ml_models)}
 
 # Import and include routers here (to avoid circular imports)
 from routers.ml_router import router as ml_router

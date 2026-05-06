@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | Agentic Medical AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .inp { @apply w-full bg-slate-800/60 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500/70 focus:ring-2 focus:ring-teal-500/20 transition-all; }
+        .section-header { @apply flex items-center gap-3 mb-5 pb-3 border-b border-white/10; }
+        #toast { transition: all 0.4s ease; }
+    </style>
+</head>
+<body class="antialiased min-h-screen">
+
+    <!-- Nav -->
+    <nav class="fixed top-0 left-0 w-full px-6 py-4 flex justify-between items-center z-50 border-b border-white/5 backdrop-blur-sm bg-slate-900/80">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.href='index.html'">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 via-blue-500 to-indigo-600 flex items-center justify-center shadow-[0_0_20px_rgba(45,212,191,0.4)] border border-white/20">
+                <i class="fa-solid fa-heart-pulse text-white text-lg"></i>
+            </div>
+            <span class="text-xl font-extrabold tracking-tight">Agentic<span class="text-gradient">Med</span> AI</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <div id="nav-links" class="flex gap-3"></div>
+            <div class="relative" id="profile-menu-wrapper">
+                <button onclick="toggleProfileMenu()" class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center border border-white/20 hover:scale-110 transition-transform shadow-lg">
+                    <i class="fa-solid fa-user-shield text-white text-sm"></i>
+                </button>
+                <div id="profile-dropdown" class="hidden absolute right-0 top-12 w-52 glass-premium rounded-2xl border border-white/10 shadow-2xl py-2 z-50">
+                    <div id="profile-name-display" class="px-4 py-2 text-xs font-bold text-teal-400 uppercase tracking-widest border-b border-white/10 mb-1"></div>
+                    <button onclick="window.location.href='profile.html'" class="w-full text-left px-4 py-2.5 text-sm text-teal-300 bg-white/5 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square w-4"></i> Edit Profile
+                    </button>
+                    <button onclick="doLogout()" class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-right-from-bracket w-4"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <main class="pt-28 pb-16 px-4 max-w-6xl mx-auto">
+
+        <!-- Header -->
+        <div class="mb-8 animate-slide-up flex items-center gap-4">
+            <button onclick="history.back()" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
+                <i class="fa-solid fa-arrow-left text-slate-400 text-sm"></i>
+            </button>
+            <div>
+                <h1 class="text-3xl font-bold">My <span class="text-gradient">Profile</span></h1>
+                <p class="text-slate-400 text-sm mt-0.5">Update your health baselines to improve Digital Twin accuracy.</p>
+            </div>
+        </div>
+
+        <!-- Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left: Summary -->
+            <div class="lg:col-span-4 flex flex-col gap-5 animate-slide-up">
+
+                <!-- Avatar Card -->
+                <div class="glass-premium rounded-3xl p-6 border border-white/10 flex flex-col items-center text-center">
+                    <div id="avatar-circle" class="w-24 h-24 rounded-full bg-gradient-to-br from-teal-400 to-indigo-600 flex items-center justify-center text-white text-3xl font-black shadow-[0_0_30px_rgba(45,212,191,0.4)] border-2 border-teal-400/40 mb-4">
+                        <span id="avatar-initials">--</span>
+                    </div>
+                    <h2 id="card-fullname" class="text-xl font-bold">Loading...</h2>
+                    <p id="card-username" class="text-xs text-slate-400 mt-1">@--</p>
+                    <span id="card-role" class="mt-3 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-teal-500/20 text-teal-400 border border-teal-500/30">Patient</span>
+                    <div class="w-full h-px bg-white/10 my-5"></div>
+                    <div class="w-full flex flex-col gap-3 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-400"><i class="fa-solid fa-droplet text-red-400 mr-2"></i>Blood Group</span><span id="c-blood" class="font-semibold">--</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400"><i class="fa-solid fa-cake-candles text-amber-400 mr-2"></i>Age</span><span id="c-age" class="font-semibold">--</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400"><i class="fa-solid fa-venus-mars text-purple-400 mr-2"></i>Gender</span><span id="c-gender" class="font-semibold">--</span></div>
+                        <div class="flex justify-between"><span class="text-slate-400"><i class="fa-solid fa-location-dot text-emerald-400 mr-2"></i>Area</span><span id="c-area" class="font-semibold text-xs text-right">--</span></div>
+                    </div>
+            </div>
+
+            <!-- Right: Edit Form -->
+            <div class="lg:col-span-8 animate-slide-up">
+                <form id="profile-form" class="glass-premium rounded-3xl p-8 border border-white/10 flex flex-col gap-8">
+
+                    <!-- Section 1: Personal Info -->
+                    <div>
+                        <div class="section-header">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center">
+                                <i class="fa-solid fa-user text-indigo-400 text-sm"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg">Personal Information</h3>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="sm:col-span-2 flex flex-col gap-1.5">
+                                <label class="text-xs font-bold uppercase tracking-widest text-slate-400">Full Name</label>
+                                <input id="inp-fullname" type="text" placeholder="Your full name" class="w-full bg-slate-800/60 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500/70 focus:ring-2 focus:ring-teal-500/20 transition-all">
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-xs font-bold uppercase tracking-widest text-slate-400">Age</label>
+                                <input id="inp-age" type="number" min="1" max="120" placeholder="e.g. 35" class="w-full bg-slate-800/60 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500/70 focus:ring-2 focus:ring-teal-500/20 transition-all">
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-xs font-bold uppercase tracking-widest text-slate-400">Gender</label>
+                                <select id="inp-gender" class="w-full bg-slate-800/60 border border-slate-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-teal-500/70 focus:ring-2 focus:ring-teal-500/20 transition-all">
+                                    <option value="">Select gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-xs font-bold uppercase tracking-widest text-slate-400">Blood Group</label>
+                                <select id="inp-blood" class="w-full bg-slate-800/60 border border-slate-600/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-teal-500/70 focus:ring-2 focus:ring-teal-500/20 transition-all">
+                                    <option value="">Select group</option>
+                                    <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                                    <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-xs font-bold uppercase tracking-widest text-slate-400">Phone Number</label>
+                                <input id="inp-phone" type="tel" placeholder="e.g. 9876543210" class="w-full bg-slate-800/60 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500/70 focus:ring-2 focus:ring-teal-500/20 transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Location -->
+                    <div>
+                        <div class="section-header">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                                <i class="fa-solid fa-location-dot text-emerald-400 text-sm"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg">Location</h3>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="sm:col-span-2 flex flex-col gap-1.5">
+                                <label class="text-xs font-bold uppercase tracking-widest text-slate-400">Village / Area Name</label>
+                                <input id="inp-area" type="text" placeholder="e.g. Koramangala, Bengaluru" class="w-full bg-slate-800/60 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500/70 focus:ring-2 focus:ring-teal-500/20 transition-all">
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-xs font-bold uppercase tracking-widest text-slate-400">Village / PIN Code</label>
+                                <input id="inp-zip" type="text" placeholder="e.g. 560034" class="w-full bg-slate-800/60 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500/70 focus:ring-2 focus:ring-teal-500/20 transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <button type="submit" id="save-btn" class="w-full bg-gradient-to-r from-teal-400 via-blue-500 to-indigo-600 hover:from-teal-300 hover:to-blue-400 text-white font-extrabold py-4 px-6 rounded-2xl shadow-[0_0_25px_rgba(59,130,246,0.5)] transform transition-all duration-300 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 text-base border border-white/20">
+                        <i class="fa-solid fa-floppy-disk text-lg"></i> Save Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden px-5 py-4 rounded-2xl border shadow-2xl flex items-center gap-3 text-sm font-semibold max-w-xs">
+        <i id="toast-icon" class="text-lg"></i>
+        <span id="toast-msg"></span>
+    </div>
+
+    <script>
+        // ── Auth Guard ───────────────────────────────────────────────
+        const username = localStorage.getItem('auth_username');
+        if (!username) window.location.href = 'login.html';
+
+        const role     = localStorage.getItem('auth_role') || 'PATIENT';
+        const fullName = localStorage.getItem('auth_fullname') || username;
+
+        // ── Nav Setup ────────────────────────────────────────────────
+        document.getElementById('profile-name-display').textContent = username;
+        const navLinks = document.getElementById('nav-links');
+        const links = role === 'DOCTOR'
+            ? [{ href: 'doctor.html', label: 'Doctor View' }, { href: 'outbreak.html', label: 'Outbreak Map' }]
+            : [{ href: 'index.html', label: 'Triage' }, { href: 'outbreak.html', label: 'Outbreak Map' }];
+        navLinks.innerHTML = links.map(l =>
+            `<a href="${l.href}" class="text-slate-400 hover:text-white font-medium px-4 py-2 rounded-lg transition-colors">${l.label}</a>`
+        ).join('');
+
+        function toggleProfileMenu() {
+            document.getElementById('profile-dropdown').classList.toggle('hidden');
+        }
+        document.addEventListener('click', e => {
+            if (!document.getElementById('profile-menu-wrapper').contains(e.target))
+                document.getElementById('profile-dropdown').classList.add('hidden');
+        });
+        function doLogout() { localStorage.clear(); window.location.href = 'login.html'; }
+
+        // ── Load Patient Data ────────────────────────────────────────
+        async function loadProfile() {
+            try {
+                const res  = await fetch(`http://localhost:8081/api/v1/patients/me?username=${username}`);
+                const data = await res.json();
+                populateUI(data);
+                populateForm(data);
+            } catch (e) {
+                showToast('Could not load profile. Is the server running?', 'error');
+            }
+        }
+
+        function populateUI(p) {
+            const initials = (p.fullName || username).split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+            document.getElementById('avatar-initials').textContent = initials;
+            document.getElementById('card-fullname').textContent   = p.fullName || username;
+            document.getElementById('card-username').textContent   = '@' + (p.username || username);
+            document.getElementById('c-blood').textContent  = p.bloodGroup  || '--';
+            document.getElementById('c-age').textContent    = p.age ? p.age + ' yrs' : '--';
+            document.getElementById('c-gender').textContent = p.gender || '--';
+            document.getElementById('c-area').textContent   = p.villageOrArea || '--';
+
+            const dr = p.diabetesRiskScore || 0;
+            const hr = p.heartRiskScore    || 0;
+            // Note: risk score bars removed from profile page.
+            // They now live on the triage page (index.html) after each submission.
+
+            if (role === 'DOCTOR') {
+                document.getElementById('card-role').textContent  = 'Doctor';
+                document.getElementById('card-role').className    = 'mt-3 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30';
+            }
+        }
+
+        function populateForm(p) {
+            document.getElementById('inp-fullname').value = p.fullName      || '';
+            document.getElementById('inp-age').value      = p.age           || '';
+            document.getElementById('inp-gender').value   = p.gender        || '';
+            document.getElementById('inp-blood').value    = p.bloodGroup    || '';
+            document.getElementById('inp-phone').value    = p.phoneNumber   || '';
+            document.getElementById('inp-area').value     = p.villageOrArea || '';
+            document.getElementById('inp-zip').value      = p.villageZip    || '';
+        }
+
+        // ── Form Submit ──────────────────────────────────────────────
+        document.getElementById('profile-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = document.getElementById('save-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+
+            const payload = {
+                username,
+                fullName:      document.getElementById('inp-fullname').value.trim() || null,
+                age:           parseInt(document.getElementById('inp-age').value)   || null,
+                gender:        document.getElementById('inp-gender').value          || null,
+                bloodGroup:    document.getElementById('inp-blood').value           || null,
+                phoneNumber:   document.getElementById('inp-phone').value.trim()   || null,
+                villageOrArea: document.getElementById('inp-area').value.trim()    || null,
+                villageZip:    document.getElementById('inp-zip').value.trim()     || null,
+            };
+
+            try {
+                const res = await fetch('http://localhost:8081/api/v1/patients/update', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error('Server error ' + res.status);
+
+                const updated = await res.json();
+                // Keep localStorage in sync
+                if (updated.fullName)      localStorage.setItem('auth_fullname', updated.fullName);
+                if (updated.villageOrArea) localStorage.setItem('auth_area', updated.villageOrArea);
+                populateUI(updated);
+                showToast('Profile saved successfully!', 'success');
+            } catch (err) {
+                showToast('Failed to save: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk text-lg"></i> Save Profile';
+            }
+        });
+
+        // ── Toast ────────────────────────────────────────────────────
+        function showToast(msg, type) {
+            const t    = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const text = document.getElementById('toast-msg');
+            text.textContent = msg;
+            if (type === 'success') {
+                t.className = 'fixed bottom-6 right-6 z-50 px-5 py-4 rounded-2xl border shadow-2xl flex items-center gap-3 text-sm font-semibold max-w-xs bg-emerald-500/20 border-emerald-500/40 text-emerald-300';
+                icon.className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+            } else {
+                t.className = 'fixed bottom-6 right-6 z-50 px-5 py-4 rounded-2xl border shadow-2xl flex items-center gap-3 text-sm font-semibold max-w-xs bg-red-500/20 border-red-500/40 text-red-300';
+                icon.className = 'fa-solid fa-triangle-exclamation text-red-400 text-lg';
+            }
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 3500);
+        }
+
+        // ── Init ─────────────────────────────────────────────────────
+        loadProfile();
+    </script>
+</body>
+</html>

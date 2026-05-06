@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal | Agentic Medical AI</title>
+    
+    <!-- SEO Best Practices -->
+    <meta name="description" content="Autonomous AI Triage Portal. Get instant, multi-doctor AI consensus diagnosis based on your symptoms and Digital Twin risk profile.">
+    <!-- Tailwind CSS CDN (Using play CDN for direct development) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="antialiased min-h-screen relative flex flex-col items-center justify-center p-4">
+
+    <!-- Header Navigation -->
+    <nav class="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-50">
+        <div class="flex items-center gap-3 animate-slide-up">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-400 via-blue-500 to-indigo-600 flex items-center justify-center shadow-[0_0_20px_rgba(45,212,191,0.5)] transform animate-float-slow cursor-pointer border border-white/20">
+                <i class="fa-solid fa-heart-pulse text-white text-2xl drop-shadow-md"></i>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tight">Agentic<span class="text-gradient">Med</span> AI</h1>
+        </div>
+        <div class="flex items-center gap-4 animate-slide-up delay-100">
+            <!-- Dynamic Nav Links injected by JS -->
+            <div id="nav-links" class="flex gap-4"></div>
+
+            <!-- Profile Dropdown -->
+            <div class="relative" id="profile-menu-wrapper">
+                <button id="profile-btn" onclick="toggleProfileMenu()" class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center border border-white/20 hover:scale-110 transition-transform shadow-lg">
+                    <i class="fa-solid fa-user-shield text-white text-sm"></i>
+                </button>
+                <div id="profile-dropdown" class="hidden absolute right-0 top-12 w-52 glass-premium rounded-2xl border border-white/10 shadow-2xl py-2 z-50">
+                    <div id="profile-name-display" class="px-4 py-2 text-xs font-bold text-teal-400 uppercase tracking-widest border-b border-white/10 mb-1"></div>
+                    <button onclick="window.location.href='profile.html'" class="w-full text-left px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square w-4"></i> Edit Profile
+                    </button>
+                    <button onclick="doLogout()" class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-right-from-bracket w-4"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="w-full max-w-5xl mt-20 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
+        
+        <!-- Left Column: Triage Form -->
+        <div class="lg:col-span-7 flex flex-col gap-6 w-full animate-slide-up delay-200">
+            
+            <header class="mb-2">
+                <h2 class="text-4xl md:text-5xl font-bold leading-tight mb-4">Instant Diagnosis by a <br/><span class="text-gradient">Multi-Doctor Brain.</span></h2>
+                <p class="text-slate-400 text-lg max-w-xl leading-relaxed">
+                    Describe how you feel. Our specialized AI doctors will debate your symptoms in real-time to reach an accurate consensus.
+                </p>
+            </header>
+
+            <!-- Logged-in user identity chip -->
+            <div class="flex items-center gap-3 glass-premium px-4 py-2.5 rounded-2xl border border-teal-500/20">
+                <div class="flex flex-col">
+                    <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Logged in as</p>
+                    <p id="identity-display" class="text-sm font-bold text-teal-300">Loading...</p>
+                </div>
+                <div class="w-px h-8 bg-white/10"></div>
+                <span id="role-pill" class="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-teal-500/20 text-teal-400 border border-teal-500/30">Patient</span>
+            </div>
+
+            <form id="triage-form" class="glass-premium p-8 rounded-3xl w-full flex flex-col gap-6 transform transition-all hover:shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
+                <!-- Symptoms Input -->
+                <div class="flex flex-col gap-2">
+                    <label for="symptoms" class="text-sm font-semibold text-slate-300">DESCRIBE SYMPTOMS</label>
+                    <textarea id="symptoms" rows="4" class="glass-input w-full p-4 rounded-xl text-lg resize-none placeholder-slate-500" placeholder="E.g., I have a high fever of 102F, severe headache, and stiff neck since yesterday morning..."></textarea>
+                </div>
+
+                <!-- Current Vitals -->
+                <div class="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4 flex flex-col gap-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-flask-vial text-blue-400 text-sm"></i>
+                        <span class="text-xs font-bold uppercase tracking-widest text-slate-300">Current Vitals</span>
+                        <span class="text-[10px] text-slate-500 ml-1">— Optional · Improves Digital Twin accuracy</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase tracking-wide text-slate-500">Glucose <span class="normal-case">(mg/dL)</span></label>
+                            <input id="vit-glucose" type="number" min="50" max="600" placeholder="e.g. 95" class="w-full bg-slate-800/70 border border-slate-600/40 rounded-xl px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500/60 focus:ring-1 focus:ring-blue-500/20 transition-all">
+                            <span class="text-[10px] text-slate-600">Normal: 70–99</span>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase tracking-wide text-slate-500">BP Diastolic <span class="normal-case">(mmHg)</span></label>
+                            <input id="vit-bp" type="number" min="40" max="160" placeholder="e.g. 80" class="w-full bg-slate-800/70 border border-slate-600/40 rounded-xl px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500/60 focus:ring-1 focus:ring-blue-500/20 transition-all">
+                            <span class="text-[10px] text-slate-600">Normal: 60–80</span>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase tracking-wide text-slate-500">BMI</label>
+                            <input id="vit-bmi" type="number" min="10" max="70" step="0.1" placeholder="e.g. 22.5" class="w-full bg-slate-800/70 border border-slate-600/40 rounded-xl px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500/60 focus:ring-1 focus:ring-blue-500/20 transition-all">
+                            <span class="text-[10px] text-slate-600">Normal: 18.5–24.9</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn" class="w-full bg-gradient-to-r from-teal-400 via-blue-500 to-indigo-600 hover:from-teal-300 hover:to-blue-400 text-white font-extrabold py-4 px-6 rounded-2xl shadow-[0_0_25px_rgba(59,130,246,0.6)] transform transition-all duration-300 hover:scale-[1.03] active:scale-95 flex items-center justify-center gap-3 text-lg border border-white/20 hover:shadow-[0_0_40px_rgba(45,212,191,0.8)]">
+                    <i class="fa-solid fa-stethoscope text-xl animate-pulse"></i> INITIATE AI TRIAGE SEQUENCE
+                </button>
+            </form>
+        </div>
+
+        <!-- Right Column: Results & Digital Twin -->
+        <div class="lg:col-span-5 flex flex-col gap-6 w-full h-full animate-slide-up delay-300">
+            
+            <!-- Result Card (Initially Hidden) -->
+            <!-- Result Card (Initially Hidden) -->
+            <div id="result-card" class="glass-premium p-8 rounded-3xl w-full hidden flex-col transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
+                
+                <!-- Loading State inside result -->
+                <div id="loading-state" class="flex flex-col items-center justify-center py-10 gap-4 hidden">
+                    <div class="spinner"></div>
+                    <p class="text-teal-400 font-medium tracking-wide animate-pulse">Doctors debating symptoms...</p>
+                </div>
+                
+                <!-- Final Data State -->
+                <div id="final-state" class="flex flex-col gap-5 w-full hidden">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Final Consensus</p>
+                            <h3 id="diagnosis-text" class="text-3xl font-bold text-white mb-2 leading-tight">Meningitis</h3>
+                        </div>
+                        <div id="emergency-badge" class="hidden bg-red-500/20 text-red-400 border border-red-500/50 px-3 py-1 rounded-full text-xs font-bold tracking-widest flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm text-slate-300">Board Confidence</span>
+                            <span id="confidence-text" class="font-bold text-teal-400">92%</span>
+                        </div>
+                        <div class="risk-bar">
+                            <div id="confidence-fill" class="risk-fill risk-safe" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-2 text-sm text-slate-400 leading-relaxed border-t border-glass-border pt-4">
+                        <strong class="text-white">Explanation:</strong> <span id="reasoning-text">Based on the acute onset of high fever and nuchal rigidity.</span>
+                    </div>
+
+                    <!-- Auto Escalation banner -->
+                    <div id="escalation-banner" class="hidden mt-2 p-3 bg-red-500/10 border-l-4 border-red-500 rounded-r-lg text-sm text-red-300 flex items-start gap-3">
+                        <i class="fa-solid fa-truck-medical mt-0.5"></i>
+                        <span>Ambulance dispatch protocol automatically triggered via Twilio.</span>
+                    </div>
+
+                    <!-- Doctor Dispatch Button -->
+                    <button id="send-to-doctor-btn" onclick="openDoctorDispatch()" class="mt-3 w-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/40 hover:to-purple-500/40 border border-indigo-500/50 text-indigo-300 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-sm hover:border-indigo-400">
+                        <i class="fa-solid fa-paper-plane"></i> Send to Nearby Doctor
+                    </button>
+                </div>
+
+            </div>
+
+             <!-- Digital Twin ML Risk Profile Card -->
+             <!-- Digital Twin ML Risk Profile Card -->
+             <div class="glass-premium p-6 rounded-3xl w-full flex flex-col gap-4">
+                <div class="flex items-center justify-between border-b border-glass-border pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-blue-500/20 p-2 rounded-lg">
+                            <i class="fa-solid fa-chart-pie text-blue-400"></i>
+                        </div>
+                        <h3 class="font-semibold text-lg">Digital Twin Risk ML</h3>
+                    </div>
+                    <span id="dt-overall-score" class="text-2xl font-bold text-teal-400 hidden">95%</span>
+                </div>
+                
+                <p class="text-xs text-slate-400 mb-2">Computed in real-time from patient vitals via Python ML Microservice.</p>
+                
+                <!-- Risk Chart Container -->
+                <div class="relative w-full h-48 flex justify-center items-center">
+                    <canvas id="digitalTwinChart" class="w-full h-full"></canvas>
+                </div>
+                
+                <!-- Fallback/Empty State text -->
+                <p id="dt-empty-text" class="text-center text-sm text-slate-500 italic absolute inset-0 flex items-center justify-center mt-20">Awaiting patient triage...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Doctor Dispatch Modal -->
+    <div id="dispatch-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-md">
+        <div class="glass-premium p-8 rounded-3xl w-full max-w-lg animate-slide-up border border-indigo-500/30 shadow-[0_0_50px_rgba(99,102,241,0.25)]">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold flex items-center gap-3">
+                    <div class="w-9 h-9 bg-indigo-500/20 rounded-xl flex items-center justify-center border border-indigo-500/40">
+                        <i class="fa-solid fa-user-doctor text-indigo-400"></i>
+                    </div>
+                    Nearby Doctors
+                </h3>
+                <button onclick="closeDispatchModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <p class="text-sm text-slate-400 mb-4">Doctors found in your registered area. Select one to forward your AI diagnosis for human review.</p>
+            <div id="doctor-list" class="flex flex-col gap-3 max-h-64 overflow-y-auto pr-1">
+                <div class="text-center py-6 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Finding doctors...</div>
+            </div>
+            <div id="dispatch-status" class="hidden mt-4 p-3 rounded-xl border text-sm font-medium text-center"></div>
+        </div>
+    </div>
+
+    <!-- JS Logic -->
+    <script src="js/app.js"></script>
+    <script>
+        // ── RBAC Navigation ──────────────────────────────────────────
+        const _role = localStorage.getItem('auth_role') || 'PATIENT';
+        const _user = localStorage.getItem('auth_username') || '';
+        const _fullName = localStorage.getItem('auth_fullname') || _user;
+        const _area = localStorage.getItem('auth_area') || '';
+
+        // Populate profile display
+        document.getElementById('identity-display').textContent = _fullName || 'Not logged in';
+        document.getElementById('profile-name-display').textContent = _user;
+        const rolePill = document.getElementById('role-pill');
+        if (_role === 'DOCTOR') {
+            rolePill.textContent = 'Doctor';
+            rolePill.className = 'text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30';
+        } else {
+            rolePill.textContent = 'Patient';
+        }
+
+        const navLinks = document.getElementById('nav-links');
+        const patientLinks = [
+            { href: 'index.html', label: 'Triage', active: true },
+            { href: 'outbreak.html', label: 'Outbreak Map', active: false }
+        ];
+        const doctorLinks = [
+            { href: 'doctor.html', label: 'Doctor View', active: false },
+            { href: 'outbreak.html', label: 'Outbreak Map', active: false }
+        ];
+        const links = _role === 'DOCTOR' ? doctorLinks : patientLinks;
+        navLinks.innerHTML = links.map(l =>
+            `<a href="${l.href}" class="${l.active ? 'text-teal-400 bg-teal-400/10' : 'text-slate-400 hover:text-white'} font-medium px-4 py-2 rounded-lg transition-colors">${l.label}</a>`
+        ).join('');
+
+        function toggleProfileMenu() {
+            document.getElementById('profile-dropdown').classList.toggle('hidden');
+        }
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('profile-menu-wrapper').contains(e.target))
+                document.getElementById('profile-dropdown').classList.add('hidden');
+        });
+        function doLogout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // ── Doctor Dispatch ──────────────────────────────────────────
+        // _lastDiagnosisLogId is populated from app.js via window._lastDiagnosisId after triage
+        function openDoctorDispatch() {
+            const diagId = window._lastDiagnosisId || null;
+            if (!diagId) {
+                alert('Please run a triage first before dispatching to a doctor.');
+                return;
+            }
+            document.getElementById('dispatch-modal').classList.remove('hidden');
+            document.getElementById('dispatch-modal').classList.add('flex');
+            loadNearbyDoctors();
+        }
+        function closeDispatchModal() {
+            document.getElementById('dispatch-modal').classList.add('hidden');
+            document.getElementById('dispatch-modal').classList.remove('flex');
+        }
+
+        async function loadNearbyDoctors() {
+            const list = document.getElementById('doctor-list');
+            list.innerHTML = '<div class="text-center py-6 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Finding doctors...</div>';
+            try {
+                const res = await fetch(`http://localhost:8081/api/v1/patients/nearby-doctors?area=${encodeURIComponent(_area)}`);
+                const doctors = await res.json();
+                if (!doctors.length) {
+                    list.innerHTML = '<p class="text-center text-slate-400 py-4">No doctors found in your area.</p>';
+                    return;
+                }
+                list.innerHTML = doctors.map(d => `
+                    <div class="flex items-center justify-between glass-premium p-4 rounded-xl border border-white/10 hover:border-indigo-500/40 transition-all">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 font-bold text-indigo-300">${d.fullName.charAt(0)}</div>
+                            <div>
+                                <p class="font-semibold text-white text-sm">${d.fullName}</p>
+                                <p class="text-xs text-slate-400"><i class="fa-solid fa-location-dot mr-1"></i>${d.villageOrArea}</p>
+                            </div>
+                        </div>
+                        <button onclick="sendToDoctor('${d.username}', '${d.fullName}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-1.5 px-4 rounded-lg transition-all">
+                            Send
+                        </button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                list.innerHTML = '<p class="text-center text-red-400 py-4">Error loading doctors. Is the server running?</p>';
+            }
+        }
+
+        async function sendToDoctor(doctorUsername, doctorName) {
+            const diagnosisId = window._lastDiagnosisId || null;
+            if (!diagnosisId) { alert('No active diagnosis to send. Run a triage first.'); return; }
+            const statusEl = document.getElementById('dispatch-status');
+            try {
+                const res = await fetch('http://localhost:8081/api/v1/consultations/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        patientUsername: _user,
+                        doctorUsername: doctorUsername,
+                        diagnosisLogId: diagnosisId,
+                        status: 'PENDING'
+                    })
+                });
+                if (res.ok) {
+                    statusEl.className = 'mt-4 p-3 rounded-xl border text-sm font-medium text-center bg-emerald-500/10 border-emerald-500/30 text-emerald-400';
+                    statusEl.textContent = `✓ Sent to ${doctorName} successfully!`;
+                    statusEl.classList.remove('hidden');
+                }
+            } catch (err) {
+                statusEl.className = 'mt-4 p-3 rounded-xl border text-sm font-medium text-center bg-red-500/10 border-red-500/30 text-red-400';
+                statusEl.textContent = 'Failed to send. Please try again.';
+                statusEl.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard | Agentic Medical AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="antialiased min-h-screen relative flex flex-col p-4 bg-slate-900">
+
+    <!-- Header Navigation -->
+    <nav class="w-full p-6 flex justify-between items-center z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg cursor-pointer">
+                <i class="fa-solid fa-user-doctor text-white text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight">Agentic<span class="text-gradient hover:text-indigo-400">Med</span> AI <span class="text-xs font-mono ml-2 text-indigo-400 border border-indigo-500/30 px-2 py-1 rounded bg-indigo-500/10">CLINICIAN VIEW</span></h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div id="nav-links" class="flex gap-4"></div>
+            <!-- Profile Dropdown -->
+            <div class="relative" id="profile-menu-wrapper">
+                <button id="profile-btn" onclick="toggleProfileMenu()" class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center border border-white/20 hover:scale-110 transition-transform shadow-lg">
+                    <i class="fa-solid fa-user-shield text-white text-sm"></i>
+                </button>
+                <div id="profile-dropdown" class="hidden absolute right-0 top-12 w-52 glass-premium rounded-2xl border border-white/10 shadow-2xl py-2 z-50">
+                    <div id="profile-name-display" class="px-4 py-2 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-white/10 mb-1"></div>
+                    <button onclick="doLogout()" class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-right-from-bracket w-4"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="w-full max-w-7xl mx-auto mt-6 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
+        
+        <!-- Left: AI Debate Log Review -->
+        <div class="flex flex-col gap-4 animate-slide-up lg:col-span-1">
+            <h2 class="text-2xl font-bold border-b border-glass-border pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-users-viewfinder text-teal-400"></i> AI Medical Board Logs
+            </h2>
+            <p class="text-sm text-slate-400">Review exactly how the multi-agent system reached its diagnostic consensus.</p>
+
+            <!-- Dynamic Logs Container -->
+            <div id="logs-container" class="flex flex-col gap-4">
+                <div class="glass-premium p-6 rounded-2xl flex justify-center text-slate-400">
+                    <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Loading AI Logs...
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Prescription Misuse Monitor -->
+        <div class="flex flex-col gap-4 animate-slide-up delay-100 lg:col-span-1">
+            <h2 class="text-2xl font-bold border-b border-glass-border pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-pills text-purple-400"></i> Misuse Monitor Queue
+            </h2>
+            <p class="text-sm text-slate-400">Live feed of prescriptions flagged by the Hybrid Gradient Boosting + Isolation Forest ML model.</p>
+
+            <!-- Test Form for Live Validation -->
+            <div class="glass-premium p-5 rounded-xl border border-purple-500/30">
+                <h3 class="text-sm font-bold text-purple-400 mb-3 uppercase tracking-wide">Test Prescription</h3>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <input id="rx_diag" type="text" value="Viral Cold" class="glass-input p-2 rounded text-sm w-full" placeholder="Diagnosis (e.g. Viral Cold)">
+                    <input id="rx_drug" type="text" value="Amoxicillin" class="glass-input p-2 rounded text-sm w-full" placeholder="Antibiotic">
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <input id="rx_dose" type="number" value="500" class="glass-input p-2 rounded text-sm w-full" placeholder="Dose (mg)">
+                    <input id="rx_dur" type="number" value="7" class="glass-input p-2 rounded text-sm w-full" placeholder="Days">
+                    <input id="rx_age" type="number" value="40" class="glass-input p-2 rounded text-sm w-full" placeholder="Age">
+                </div>
+                <button onclick="checkPrescription()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2 rounded transition-colors text-sm">
+                    Run ML Safety Check
+                </button>
+                
+                <div id="rx-output" class="hidden mt-4 p-4 rounded-lg border transition-all duration-300">
+                    <p id="rx-status" class="font-bold text-lg mb-1"></p>
+                    <p id="rx-reason" class="text-sm text-slate-300 mb-3"></p>
+                    <div id="rx-chart-container" class="relative w-full h-32 hidden">
+                        <canvas id="rxChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic logs list -->
+            <div id="prescriptions-container" class="flex flex-col gap-2 mt-2">
+                <div class="glass-premium p-6 rounded-2xl flex justify-center text-slate-400">
+                    <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Loading Prescriptions...
+                </div>
+            </div>
+
+        </div>
+        <!-- Right: Consultation Inbox -->
+        <div class="flex flex-col gap-4 animate-slide-up delay-200 lg:col-span-1">
+            <h2 class="text-2xl font-bold border-b border-glass-border pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-inbox text-indigo-400"></i> Consultation Inbox
+                <span id="inbox-badge" class="ml-auto hidden bg-indigo-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+            </h2>
+            <p class="text-sm text-slate-400">Incoming patient dispatch requests for your clinical review.</p>
+            <div id="consultation-container" class="flex flex-col gap-3"></div>
+        </div>
+    </main>
+
+    <script>
+        let rxChartInstance = null;
+
+        // ── RBAC Navigation ──────────────────────────────
+        const _role = localStorage.getItem('auth_role') || 'DOCTOR';
+        const _user = localStorage.getItem('auth_username') || '';
+        document.getElementById('profile-name-display').textContent = _user;
+
+        const navLinks = document.getElementById('nav-links');
+        const links = _role === 'PATIENT'
+            ? [ { href: 'index.html', label: 'Triage', active: false }, { href: 'outbreak.html', label: 'Outbreak Map', active: false } ]
+            : [ { href: 'doctor.html', label: 'Doctor View', active: true }, { href: 'outbreak.html', label: 'Outbreak Map', active: false } ];
+        navLinks.innerHTML = links.map(l =>
+            `<a href="${l.href}" class="${l.active ? 'text-indigo-400 bg-indigo-500/10' : 'text-slate-400 hover:text-white'} font-medium px-4 py-2 rounded-lg transition-colors">${l.label}</a>`
+        ).join('');
+
+        function toggleProfileMenu() {
+            document.getElementById('profile-dropdown').classList.toggle('hidden');
+        }
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('profile-menu-wrapper').contains(e.target))
+                document.getElementById('profile-dropdown').classList.add('hidden');
+        });
+        function doLogout() { localStorage.clear(); window.location.href = 'login.html'; }
+        // ─────────────────────────────────────────────────
+
+        function toggleAgents(id) {
+            const el = document.getElementById(`agents-${id}`);
+            const icon = document.getElementById(`icon-${id}`);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                el.classList.add('flex', 'animate-slide-up');
+                icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+            } else {
+                el.classList.add('hidden');
+                el.classList.remove('flex', 'animate-slide-up');
+                icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchLogs();
+            fetchPrescriptions();
+            fetchConsultations();
+            setInterval(() => { fetchLogs(); fetchPrescriptions(); fetchConsultations(); }, 12000);
+        });
+
+        async function fetchLogs() {
+            try {
+                const res = await fetch('http://localhost:8081/api/v1/dashboard/logs');
+                if(!res.ok) return;
+                const logs = await res.json();
+                const container = document.getElementById('logs-container');
+                container.innerHTML = '';
+                if(logs.length === 0) {
+                    container.innerHTML = '<div class="glass-premium p-6 rounded-2xl flex justify-center text-slate-400">No AI Medical logs available.</div>';
+                    return;
+                }
+                logs.forEach((log, idx) => {
+                    const delayClass = `delay-${(idx % 5) * 100}`;
+                    const escalateBadge = log.emergencyEscalated
+                        ? '<span class="bg-red-500/20 text-white px-3 py-1 rounded text-xs font-bold font-mono border border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-pulse"><i class="fa-solid fa-triangle-exclamation mr-1"></i> EMERGENCY ESCALATED</span>'
+                        : '<span class="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded text-xs font-bold font-mono border border-emerald-500/30">Stable</span>';
+                    const patientName = log.patient ? log.patient.fullName : 'Unknown';
+                    const patientAge  = log.patient ? log.patient.age : '?';
+                    const patientGender = log.patient ? log.patient.gender : '?';
+                    const html = `
+                        <div class="glass-premium p-6 rounded-2xl flex flex-col gap-4 mb-2 animate-slide-up ${delayClass} hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(45,212,191,0.1)] hover:border-teal-500/30 transition-all duration-300">
+                            <div class="flex justify-between items-center bg-[#152033] p-4 rounded-xl border border-slate-700/50">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold border border-indigo-500/30">${patientName.charAt(0)}</div>
+                                    <div><h3 class="font-bold text-lg text-white">${patientName}</h3><p class="text-xs text-slate-400 font-mono">${patientAge} yrs • ${patientGender}</p></div>
+                                </div>
+                                ${escalateBadge}
+                            </div>
+                            <p class="text-sm italic text-slate-300 bg-white/5 p-4 rounded-xl border-l-2 border-indigo-500">&ldquo;${log.symptomsInput || 'No symptoms provided'}&rdquo;</p>
+                            <button onclick="toggleAgents('${log.id}')" class="flex justify-between items-center w-full bg-slate-800/40 hover:bg-slate-700/60 p-3 rounded-lg border border-slate-700 transition-colors text-slate-300">
+                                <span class="text-xs font-bold uppercase tracking-widest text-slate-400"><i class="fa-solid fa-microchip mr-2 text-indigo-400"></i> View AI Deliberation</span>
+                                <i id="icon-${log.id}" class="fa-solid fa-chevron-down ml-2 text-sm"></i>
+                            </button>
+                            <div id="agents-${log.id}" class="hidden flex-col gap-3">
+                                <div class="bg-blue-900/20 border border-blue-500/20 rounded-xl p-4"><p class="text-xs font-bold text-blue-400 uppercase mb-2">Infection Agent</p><p class="text-xs text-slate-300">${log.infectionAgentOutput}</p></div>
+                                <div class="bg-orange-900/20 border border-orange-500/20 rounded-xl p-4"><p class="text-xs font-bold text-orange-400 uppercase mb-2">Fever Agent</p><p class="text-xs text-slate-300">${log.feverAgentOutput}</p></div>
+                                <div class="bg-rose-900/20 border border-rose-500/20 rounded-xl p-4"><p class="text-xs font-bold text-rose-400 uppercase mb-2">Heart Agent</p><p class="text-xs text-slate-300">${log.heartAgentOutput}</p></div>
+                            </div>
+                            <div class="relative overflow-hidden rounded-xl p-[1px] bg-gradient-to-r from-teal-400 via-blue-500 to-indigo-600">
+                                <div class="bg-[#0f172a] p-5 rounded-xl">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-[11px] font-bold text-teal-400 uppercase tracking-widest"><i class="fa-solid fa-gavel mr-1"></i>Supervisor Final</span>
+                                        <span class="text-teal-400 font-bold text-xs">${log.confidenceScore || 0}% CONFIDENCE</span>
+                                    </div>
+                                    <p class="text-lg text-white font-semibold mb-2">${log.finalDiagnosis || 'Unknown'}</p>
+                                    <div class="mt-4 flex gap-3">
+                                        <button id="btn-ack-${log.id}" onclick="updateLogStatus('${log.id}', 'ACKNOWLEDGED')" class="flex-[2] bg-gradient-to-r from-teal-500/20 to-emerald-500/20 hover:from-teal-500/40 border border-teal-500/50 text-teal-300 py-2.5 rounded-lg text-sm font-bold transition-all">Acknowledge</button>
+                                        <button id="btn-rej-${log.id}" onclick="updateLogStatus('${log.id}', 'REJECTED')" class="flex-1 bg-slate-800 hover:bg-slate-700 border border-red-500/30 text-red-300 py-2.5 rounded-lg text-sm flex justify-center items-center gap-2"><i class="fa-solid fa-xmark"></i> Reject</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    container.insertAdjacentHTML('beforeend', html);
+                });
+            } catch (err) { console.error('Failed to load logs', err); }
+        }
+
+        async function updateLogStatus(logId, status) {
+            try {
+                const ackBtn = document.getElementById(`btn-ack-${logId}`);
+                const rejBtn = document.getElementById(`btn-rej-${logId}`);
+                const res = await fetch(`http://localhost:8081/api/v1/dashboard/logs/${logId}/status?status=${status}`, { method: 'POST' });
+                if (res.ok) {
+                    if (status === 'ACKNOWLEDGED') {
+                        ackBtn.textContent = 'Acknowledged ✓'; ackBtn.classList.add('from-teal-600','to-emerald-600','text-white'); rejBtn.style.opacity = '0.3'; rejBtn.disabled = true;
+                    } else {
+                        rejBtn.innerHTML = 'Rejected ✗'; rejBtn.classList.replace('bg-slate-800','bg-red-600'); rejBtn.classList.replace('text-red-300','text-white'); ackBtn.style.opacity = '0.3'; ackBtn.disabled = true;
+                    }
+                }
+            } catch (err) { alert('Failed to update status.'); }
+        }
+
+        // ── Consultation Inbox ────────────────────────────
+        async function fetchConsultations() {
+            const doctorUser = localStorage.getItem('auth_username');
+            if (!doctorUser) return;
+            try {
+                const res = await fetch(`http://localhost:8081/api/v1/consultations/incoming?doctor=${doctorUser}`);
+                if (!res.ok) return;
+                const list = await res.json();
+                const container = document.getElementById('consultation-container');
+                const badge = document.getElementById('inbox-badge');
+                container.innerHTML = '';
+                const pending = list.filter(c => c.status === 'PENDING');
+                badge.textContent = pending.length;
+                badge.classList.toggle('hidden', pending.length === 0);
+                if (!list.length) {
+                    container.innerHTML = '<div class="glass-premium p-6 rounded-2xl text-center text-slate-400 flex flex-col items-center gap-2"><i class="fa-solid fa-envelope-open text-2xl text-indigo-400/40"></i><span>No consultations yet.</span></div>';
+                    return;
+                }
+                list.forEach(c => {
+                    const isPending = c.status === 'PENDING';
+                    container.insertAdjacentHTML('beforeend', `
+                        <div class="glass-premium rounded-xl overflow-hidden border ${isPending ? 'border-indigo-500/40' : 'border-white/5'} transition-all">
+                            <div class="${isPending ? 'bg-indigo-500/10' : 'bg-white/5'} px-4 py-3 flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold text-sm text-white"><i class="fa-solid fa-user mr-1.5 text-indigo-400"></i>${c.patientUsername}</p>
+                                    <p class="text-[10px] text-slate-400 font-mono mt-0.5">${new Date(c.createdAt).toLocaleString()}</p>
+                                </div>
+                                <span class="${isPending ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'} border px-2 py-0.5 rounded-full text-[10px] font-bold uppercase">${c.status}</span>
+                            </div>
+                            <div class="p-4">
+                                <p class="text-xs text-slate-400 mb-3">Log ID: <span class="font-mono text-indigo-400">${c.diagnosisLogId}</span></p>
+                                ${c.doctorReply ? `<div class="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-xs text-emerald-300 mb-3"><i class="fa-solid fa-reply mr-1"></i> <strong>Your reply:</strong> ${c.doctorReply}</div>` : ''}
+                                ${isPending ? `
+                                <textarea id="reply-${c.id}" rows="2" class="glass-input w-full p-2 rounded-lg text-sm resize-none placeholder-slate-600 mb-2" placeholder="Type your clinical reply..."></textarea>
+                                <button onclick="sendReply('${c.id}')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-lg text-xs transition-all">
+                                    <i class="fa-solid fa-paper-plane mr-1"></i> Send Reply
+                                </button>` : ''}
+                            </div>
+                        </div>`);
+                });
+            } catch (err) { console.error('Consultation fetch failed', err); }
+        }
+
+        async function sendReply(consultationId) {
+            const reply = document.getElementById(`reply-${consultationId}`).value.trim();
+            if (!reply) { alert('Please type a reply.'); return; }
+            const res = await fetch(`http://localhost:8081/api/v1/consultations/reply?id=${consultationId}&reply=${encodeURIComponent(reply)}`, { method: 'POST' });
+            if (res.ok) { fetchConsultations(); }
+        }
+        // ─────────────────────────────────────────────────
+
+        async function fetchPrescriptions() {
+            try {
+                const res = await fetch('http://localhost:8081/api/v1/dashboard/prescriptions/flagged');
+                if(!res.ok) return;
+                const rxList = await res.json();
+                const container = document.getElementById('prescriptions-container');
+                container.innerHTML = '';
+                if(rxList.length === 0) {
+                    container.innerHTML = '<div class="glass-premium p-6 rounded-2xl flex justify-center text-slate-400 flex-col items-center gap-3"><i class="fa-solid fa-shield-virus text-3xl text-emerald-500/50"></i><span>All clear. No anomalous prescriptions detected.</span></div>';
+                    return;
+                }
+                rxList.forEach((rx, idx) => {
+                    container.insertAdjacentHTML('beforeend', `
+                    <div class="glass-premium p-0 rounded-xl overflow-hidden mt-3 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                        <div class="bg-gradient-to-r from-red-500/10 to-transparent border-l-4 border-red-500 p-5 relative overflow-hidden">
+                            <i class="fa-solid fa-triangle-exclamation absolute right-[-20px] bottom-[-20px] text-8xl text-red-500/5"></i>
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div><span class="text-[10px] text-red-400 font-bold tracking-widest uppercase">ML Anomaly Detected</span></div>
+                                    <h4 class="font-bold text-xl text-white">${rx.drugName} ${rx.dosageMg}mg x ${rx.durationDays} Days</h4>
+                                </div>
+                                <span class="bg-slate-800/80 px-2 py-1 rounded text-xs text-slate-400 border border-slate-700">Pt. Age: ${rx.patientAge || '?'}</span>
+                            </div>
+                            <div class="bg-black/20 p-3 rounded-lg border border-slate-700 mb-3"><p class="text-sm text-slate-300"><span class="text-slate-500 uppercase tracking-widest text-[10px] font-bold block mb-1">Target Diagnosis</span>${rx.diagnosisName}</p></div>
+                            <div class="text-sm text-red-300 bg-red-950/40 p-3 rounded-lg border border-red-500/30 mb-4"><i class="fa-solid fa-robot mr-2 text-red-400"></i>${rx.misuseReason || 'Anomalous dosage or duration detected.'}</div>
+                            <div class="flex gap-3">
+                                <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex-[2]">Block Order</button>
+                                <button class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 px-4 py-2 rounded-lg text-sm flex-1">Force Approve</button>
+                            </div>
+                        </div>
+                    </div>`);
+                });
+            } catch (err) { console.error('Failed to load prescriptions', err); }
+        }
+
+        async function checkPrescription() {
+            const outBox = document.getElementById('rx-output');
+            const statusTxt = document.getElementById('rx-status');
+            const reasonTxt = document.getElementById('rx-reason');
+            const chartContainer = document.getElementById('rx-chart-container');
+            outBox.classList.remove('hidden');
+            chartContainer.classList.add('hidden');
+            statusTxt.className = 'font-bold text-lg mb-1 text-slate-400 animate-pulse';
+            statusTxt.innerText = 'Analyzing patterns...';
+            reasonTxt.innerText = '';
+            if(rxChartInstance) { rxChartInstance.destroy(); rxChartInstance = null; }
+            const payload = {
+                diagnosis: document.getElementById('rx_diag').value,
+                antibiotic_name: document.getElementById('rx_drug').value,
+                dosage_mg: parseInt(document.getElementById('rx_dose').value),
+                duration_days: parseInt(document.getElementById('rx_dur').value),
+                patient_age: parseInt(document.getElementById('rx_age').value)
+            };
+            try {
+                const res = await fetch('http://localhost:8000/api/ml/check-prescription', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+                const data = await res.json();
+                if(data.status === 'ANOMALY') {
+                    outBox.className = 'mt-4 p-4 rounded-lg border bg-red-500/10 border-red-500/50';
+                    statusTxt.className = 'font-bold text-xl mb-1 text-red-400';
+                    statusTxt.innerHTML = '<i class="fa-solid fa-ban mr-1"></i> FLAGGED FOR MISUSE';
+                } else {
+                    outBox.className = 'mt-4 p-4 rounded-lg border bg-emerald-500/10 border-emerald-500/50';
+                    statusTxt.className = 'font-bold text-xl mb-1 text-emerald-400';
+                    statusTxt.innerHTML = '<i class="fa-solid fa-check-circle mr-1"></i> CLINICALLY SAFE';
+                }
+                reasonTxt.innerText = data.reason;
+                chartContainer.classList.remove('hidden');
+                const ctx = document.getElementById('rxChart').getContext('2d');
+                const gbScore = data.classifier_flag ? 100 : 0;
+                const isoScore = data.anomaly_flag ? 100 : 0;
+                rxChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: ['Gradient Boosting', 'Isolation Forest'], datasets: [{ label: 'Risk', data: [gbScore, isoScore], backgroundColor: [gbScore > 0 ? 'rgba(239,68,68,0.8)' : 'rgba(16,185,129,0.8)', isoScore > 0 ? 'rgba(239,68,68,0.8)' : 'rgba(16,185,129,0.8)'], borderRadius: 4 }] },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { max: 100, display: false }, y: { ticks: { color: '#cbd5e1' }, grid: { display: false } } }, plugins: { legend: { display: false } } }
+                });
+            } catch (err) {
+                outBox.className = 'mt-4 p-4 rounded-lg border bg-slate-800 border-slate-700';
+                statusTxt.className = 'font-bold text-lg mb-1 text-red-400';
+                statusTxt.innerText = 'Connection Error: Is the ML Server running?';
+            }
+        }
+    </script>
+</body>
+</html>
+

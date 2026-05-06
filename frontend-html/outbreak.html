@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outbreak Map | Agentic Medical AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="antialiased min-h-screen relative flex flex-col items-center p-4">
+
+    <!-- Header Navigation -->
+    <nav class="w-full p-6 flex justify-between items-center z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center shadow-lg cursor-pointer">
+                <i class="fa-solid fa-earth-asia text-white text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight">Agentic<span class="text-gradient">Med</span> AI</h1>
+        </div>
+        <div class="flex gap-4">
+            <a href="index.html" class="text-slate-400 font-medium px-4 py-2 rounded-lg hover:text-white transition-colors">Triage</a>
+            <a href="doctor.html" class="text-slate-400 font-medium px-4 py-2 rounded-lg hover:text-white transition-colors">Doctor View</a>
+            <a href="outbreak.html" class="text-teal-400 font-medium px-4 py-2 rounded-lg bg-teal-400/10 transition-colors">Outbreak Map</a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="w-full max-w-7xl mt-10 grid grid-cols-1 gap-8 relative z-10 px-4">
+        
+        <header class="flex flex-col md:flex-row justify-between items-end mb-4 animate-slide-up border-b border-glass-border pb-6">
+            <div>
+                <h2 class="text-4xl font-bold leading-tight mb-2">Public Health <span class="text-gradient">Outbreak Forecast</span></h2>
+                <p class="text-slate-400 text-lg max-w-2xl leading-relaxed">
+                    Powered by Meta Prophet. Analyzing years of village-level data to predict regional spikes in infectious diseases 7 days in advance.
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0 flex flex-wrap gap-4 items-end">
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] uppercase font-bold text-slate-400 tracking-widest block">Disease Type</label>
+                    <select id="disease-select" class="glass-input bg-slate-800/80 text-white p-2.5 rounded-lg border border-slate-700 text-sm focus:border-teal-400 outline-none">
+                        <option value="fever" class="text-slate-900">Undiagnosed Fever</option>
+                        <option value="covid" class="text-slate-900">Covid-19</option>
+                        <option value="dengue" class="text-slate-900">Dengue</option>
+                        <option value="diarrhea" class="text-slate-900">Diarrhea</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] uppercase font-bold text-slate-400 tracking-widest block">Timeframe</label>
+                    <select id="timeframe-select" class="glass-input bg-slate-800/80 text-white p-2.5 rounded-lg border border-slate-700 text-sm focus:border-teal-400 outline-none">
+                        <option value="day" class="text-slate-900">Day-wise Forecast (1 Day)</option>
+                        <option value="week" class="text-slate-900" selected>Week-wise Forecast (7 Days)</option>
+                        <option value="month" class="text-slate-900">Monthly Forecast (30 Days)</option>
+                    </select>
+                </div>
+                <div class="bg-indigo-500/10 border border-indigo-500/30 px-4 py-2 rounded-xl text-center min-w-[100px]">
+                    <p class="text-[10px] text-indigo-300 font-bold uppercase overflow-hidden">Model MAPE</p>
+                    <p id="mape-stat" class="text-xl font-bold text-white"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
+                </div>
+                <button onclick="fetchForecast()" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl transition-colors shadow-lg border border-slate-700 font-medium">
+                    <i class="fa-solid fa-rotate-right mr-2 text-teal-400"></i>Re-Run Prophet
+                </button>
+            </div>
+        </header>
+
+        <!-- Chart Container -->
+        <div class="glass-panel p-6 rounded-2xl w-full h-[60vh] animate-slide-up delay-200 relative flex justify-center items-center">
+            
+            <div id="chart-loader" class="absolute inset-0 flex flex-col justify-center items-center bg-slate-900/50 backdrop-blur-sm rounded-2xl z-10">
+                <div class="spinner mb-4 w-12 h-12"></div>
+                <p class="text-teal-400 font-medium animate-pulse">Running Prophet Time-Series Model...</p>
+            </div>
+
+            <canvas id="outbreakChart" class="w-full h-full"></canvas>
+        </div>
+        
+    </main>
+
+    <!-- JS Logic -->
+    <script>
+        let outbreakChartInstance = null;
+        
+        document.addEventListener('DOMContentLoaded', fetchForecast);
+
+        async function fetchForecast() {
+            const loader = document.getElementById('chart-loader');
+            loader.classList.remove('hidden');
+            
+            const disease = document.getElementById('disease-select').value;
+            const timeframe = document.getElementById('timeframe-select').value;
+            
+            try {
+                // Task 3: Securely fetch from Java proxy instead of Python
+                const url = `http://localhost:8081/api/v1/dashboard/outbreak?zip_code=560001&disease=${disease}&timeframe=${timeframe}`;
+                
+                const res = await fetch(url);
+                if (!res.ok) throw new Error("Invalid response from Java backend proxy");
+                
+                const data = await res.json();
+                
+                document.getElementById('mape-stat').innerText = data.model_mape + '%';
+                
+                renderChart(data);
+                
+            } catch (err) {
+                console.error("Failed to fetch outbreak:", err);
+                loader.innerHTML = '<p class="text-red-400"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Failed to connect to API on Port 8081</p>';
+            }
+        }
+
+        function renderChart(data) {
+            const loader = document.getElementById('chart-loader');
+            loader.classList.add('hidden');
+            
+            const ctx = document.getElementById('outbreakChart').getContext('2d');
+            
+            if (outbreakChartInstance) {
+                outbreakChartInstance.destroy();
+            }
+
+            const dates = data.forecast.map(item => {
+                const d = new Date(item.date);
+                return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            });
+            
+            const counts = data.forecast.map(item => item.predicted_cases);
+            const lowerBounds = data.forecast.map(item => parseInt(item.range.split(' - ')[0]));
+            const upperBounds = data.forecast.map(item => parseInt(item.range.split(' - ')[1]));
+
+            // Find critical points for point colors
+            const pointColors = data.forecast.map(item => {
+                if(item.status === 'CRITICAL') return '#ef4444'; // Red
+                if(item.status === 'WARNING') return '#f59e0b'; // Amber
+                return '#2dd4bf'; // Teal
+            });
+            const pointRadii = data.forecast.map(item => item.status === 'CRITICAL' ? 8 : 4);
+
+            outbreakChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: `Predicted ${document.getElementById('disease-select').options[document.getElementById('disease-select').selectedIndex].text} Spikes`,
+                            data: counts,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            pointBackgroundColor: pointColors,
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: pointRadii,
+                            pointHoverRadius: 10,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', font: { family: 'Outfit', size: 14 } } },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#2dd4bf',
+                            bodyColor: '#f8fafc',
+                            padding: 12,
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    const rawIdx = context.dataIndex;
+                                    const item = data.forecast[rawIdx];
+                                    return `Cases: ${item.predicted_cases}  (Range: ${item.range}) - ${item.status}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)', tickColor: 'transparent' },
+                            ticks: { color: '#94a3b8', font: { family: 'Outfit' } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { family: 'Outfit' } }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+# Java
+target/
+*.class
+*.jar
+*.war
+*.ear
+apache-maven-*/
+maven.zip
+maven.log
+mvn-error.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+*.pyc
+*.pyo
+*.pyd
+
+# Node.js
+node_modules/
+dist/
+build/
+.next/
+.parcel-cache/
+.eslintcache
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs & Temps
+*.log
+boot-*.txt
+*-err.txt
+out.txt
+scratch_results.txt
+frontend-server.txt
+frontend-server-err.txt
+hs_err_pid*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Project specific
+login_test.json

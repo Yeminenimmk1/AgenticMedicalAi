@@ -1,6 +1,11 @@
 import axios from 'axios'
 
-const api = axios.create({ baseURL: '/api/v1' })
+// In dev (localhost), Vite proxy handles /api → localhost:8081
+// In production (Vercel), VITE_BACKEND_URL points to Render backend
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || ''
+const PYTHON_ML_URL = import.meta.env.VITE_PYTHON_ML_URL || 'http://localhost:8000'
+
+const api = axios.create({ baseURL: `${BACKEND_URL}/api/v1` })
 
 // ── Auth ──────────────────────────────────────────────────────────
 export const patientLogin   = (data) => api.post('/auth/login', data)
@@ -30,4 +35,4 @@ export const getOutbreak         = (disease, tf)     => api.get(`/dashboard/outb
 
 // ── ML ────────────────────────────────────────────────────────────
 export const checkPrescription = (data) =>
-  axios.post('http://localhost:8000/api/ml/check-prescription', data)
+  axios.post(`${PYTHON_ML_URL}/api/ml/check-prescription`, data)
